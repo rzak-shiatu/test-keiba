@@ -54,8 +54,7 @@ def _auto_text_color(background: str) -> str:
     luminance = (0.299 * red + 0.587 * green + 0.114 * blue) / 255
     return "#000000" if luminance > 0.6 else "#ffffff"
 
-
-def _render_rating_cell(rating: str | None) -> str:
+  def _render_rating_cell(rating: str | None) -> str:
     if not rating:
         return ""
     css_class = RATING_CLASSES.get(rating.upper(), "rating-generic")

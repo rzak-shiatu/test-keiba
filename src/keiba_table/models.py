@@ -54,6 +54,7 @@ class Criterion:
 class HorseEntry:
     """Represents a single horse entry row in the table."""
 
+    post_position: int
     number: int
     name: str
     sex_age: str
@@ -111,7 +112,6 @@ class HorseEntry:
             ratings={str(key): str(value) for key, value in ratings.items()},
             notes={str(key): str(value) for key, value in notes.items()},
         )
-
 
 @dataclass(slots=True)
 class RaceTable:
