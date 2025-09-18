@@ -117,7 +117,6 @@ def _assign_post_positions(entries: List[HorseEntry]) -> None:
     # presented and guarantees a deterministic output for rendering/tests.
     entries.sort(key=lambda entry: entry.number)
 
-
 def load_race_table(path: str | Path) -> RaceTable:
     """Load race table data from a TOML file."""
 

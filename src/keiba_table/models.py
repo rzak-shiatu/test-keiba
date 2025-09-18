@@ -112,7 +112,6 @@ class HorseEntry:
             notes={str(key): str(value) for key, value in notes.items()},
         )
 
-
 @dataclass(slots=True)
 class RaceTable:
     """Aggregates all information required to render the race table."""

@@ -41,7 +41,6 @@ RATING_CLASSES = {
 
 
 def _auto_text_color(background: str) -> str:
-    """Return black or white text depending on the background colour."""
 
     hex_value = background.lstrip("#")
     if len(hex_value) != 6:
@@ -56,8 +55,8 @@ def _auto_text_color(background: str) -> str:
     luminance = (0.299 * red + 0.587 * green + 0.114 * blue) / 255
     return "#000000" if luminance > 0.6 else "#ffffff"
 
-
 def _render_rating_cell(rating: str | None) -> str:
+
     if not rating:
         return ""
     css_class = RATING_CLASSES.get(rating.upper(), "rating-generic")
@@ -106,7 +105,6 @@ def _post_position_cell(table: RaceTable, entry: HorseEntry) -> str:
         f"<td class=\"post-position\"{style_attr}>"
         f"{escape(str(entry.post_position))}</td>"
     )
-
 
 def render_html(table: RaceTable) -> str:
     """Render the race table to an HTML string."""
@@ -216,12 +214,15 @@ def render_html(table: RaceTable) -> str:
             f"    <div class=\"distance-note\">{escape(table.distance_note)}</div>"
         )
 
+
     body_parts.append("    <table class=\"race-table\">")
 
     headers = table.column_headers()
+
     header_html = "      <tr>" + "".join(
         f"<th>{escape(header)}</th>" for header in headers
     ) + "</tr>"
+
     body_parts.append("      <thead>")
     body_parts.append(header_html)
     body_parts.append("      </thead>")
@@ -249,6 +250,7 @@ def render_html(table: RaceTable) -> str:
             row_cells.append(
                 f"<td class=\"comments\">{escape(entry.comments or '')}</td>"
             )
+
 
         body_parts.append("        <tr>" + "".join(row_cells) + "</tr>")
 
