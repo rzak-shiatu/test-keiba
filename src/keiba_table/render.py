@@ -8,7 +8,7 @@ from typing import Iterable, Sequence
 
 from .models import AdditionalColumn, Criterion, HorseEntry, RaceTable
 
-BRACKET_COLORS = {
+DEFAULT_BRACKET_COLORS = {
     1: "#ffffff",
     2: "#000000",
     3: "#ff4b4b",
@@ -19,7 +19,7 @@ BRACKET_COLORS = {
     8: "#ff7fd1",
 }
 
-BRACKET_TEXT_COLORS = {
+DEFAULT_BRACKET_TEXT_COLORS = {
     1: "#000000",
     2: "#ffffff",
     3: "#ffffff",
@@ -40,7 +40,21 @@ RATING_CLASSES = {
 }
 
 
-def _render_rating_cell(rating: str | None) -> str:
+def _auto_text_color(background: str) -> str:
+    hex_value = background.lstrip("#")
+    if len(hex_value) != 6:
+        return "#000000"
+    try:
+        red = int(hex_value[0:2], 16)
+        green = int(hex_value[2:4], 16)
+        blue = int(hex_value[4:6], 16)
+    except ValueError:  # pragma: no cover - defensive programming
+        return "#000000"
+
+    luminance = (0.299 * red + 0.587 * green + 0.114 * blue) / 255
+    return "#000000" if luminance > 0.6 else "#ffffff"
+
+  def _render_rating_cell(rating: str | None) -> str:
     if not rating:
         return ""
     css_class = RATING_CLASSES.get(rating.upper(), "rating-generic")
@@ -182,8 +196,13 @@ def render_html(table: RaceTable) -> str:
 
     for entry in table.horses:
         row_cells = []
-        background = BRACKET_COLORS.get(entry.post_position)
-        text_color = BRACKET_TEXT_COLORS.get(entry.post_position, "#000000")
+        background = table.bracket_colors.get(entry.post_position)
+        text_color = None
+        if background:
+            text_color = _auto_text_color(background)
+        else:
+            background = DEFAULT_BRACKET_COLORS.get(entry.post_position)
+            text_color = DEFAULT_BRACKET_TEXT_COLORS.get(entry.post_position, "#000000") if background else "#000000"
         style_attr = ""
         if background:
             style_attr = f' style="background:{background};color:{text_color};"'

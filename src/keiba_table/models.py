@@ -64,6 +64,7 @@ class HorseEntry:
     comments: Optional[str] = None
     ratings: Dict[str, str] = field(default_factory=dict)
     notes: Dict[str, str] = field(default_factory=dict)
+    post_position: int = field(init=False)
 
     @staticmethod
     def from_raw(
@@ -71,7 +72,10 @@ class HorseEntry:
         criteria: Sequence[Criterion],
         additional_columns: Sequence["AdditionalColumn"] | None = None,
     ) -> "HorseEntry":
-        missing = {field for field in ["post_position", "number", "name", "sex_age", "weight", "jockey"] if field not in raw}
+        if "post_position" in raw:
+            raise ValueError("Horse entry definitions must not include 'post_position'; it is assigned automatically")
+
+        missing = {field for field in ["number", "name", "sex_age", "weight", "jockey"] if field not in raw}
         if missing:
             raise ValueError(f"Horse entry is missing required fields: {', '.join(sorted(missing))}")
 
@@ -98,7 +102,6 @@ class HorseEntry:
             raise ValueError(f"Horse entry '{raw.get('name')}' contains ratings for unknown criteria: {', '.join(invalid)}")
 
         return HorseEntry(
-            post_position=int(raw["post_position"]),
             number=int(raw["number"]),
             name=str(raw["name"]),
             sex_age=str(raw["sex_age"]),
@@ -109,7 +112,6 @@ class HorseEntry:
             ratings={str(key): str(value) for key, value in ratings.items()},
             notes={str(key): str(value) for key, value in notes.items()},
         )
-
 
 @dataclass(slots=True)
 class RaceTable:
@@ -123,6 +125,7 @@ class RaceTable:
     additional_columns: List[AdditionalColumn] = field(default_factory=list)
     legend: Dict[str, str] = field(default_factory=dict)
     footnote: Optional[str] = None
+    bracket_colors: Dict[int, str] = field(default_factory=dict)
 
     @property
     def has_running_style(self) -> bool:
