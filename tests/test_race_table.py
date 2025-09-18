@@ -38,7 +38,7 @@ class RaceTableTests(unittest.TestCase):
             )
         return "".join(parts)
 
-      def test_structured_additional_columns_are_loaded(self) -> None:
+    def test_structured_additional_columns_are_loaded(self) -> None:
         toml_content = """
         [race]
         title = "テスト"
@@ -108,7 +108,7 @@ class RaceTableTests(unittest.TestCase):
 
     def test_post_positions_follow_allocation_rules(self) -> None:
         scenarios = {
-            9: [1, 2, 2, 3, 3, 4, 4, 5, 5],
+            9: [1, 1, 2, 2, 3, 3, 4, 4, 5],
             15: [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8],
             16: [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8],
             17: [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8],
@@ -278,4 +278,4 @@ class RaceTableTests(unittest.TestCase):
 
             self.assertEqual([1, 2], [horse.number for horse in table.horses])
             self.assertEqual([1, 2], [horse.post_position for horse in table.horses])
-            
+

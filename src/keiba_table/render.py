@@ -41,6 +41,7 @@ RATING_CLASSES = {
 
 
 def _auto_text_color(background: str) -> str:
+
     hex_value = background.lstrip("#")
     if len(hex_value) != 6:
         return "#000000"
@@ -54,30 +55,56 @@ def _auto_text_color(background: str) -> str:
     luminance = (0.299 * red + 0.587 * green + 0.114 * blue) / 255
     return "#000000" if luminance > 0.6 else "#ffffff"
 
-  def _render_rating_cell(rating: str | None) -> str:
+def _render_rating_cell(rating: str | None) -> str:
+
     if not rating:
         return ""
     css_class = RATING_CLASSES.get(rating.upper(), "rating-generic")
     return f'<span class="rating-chip {css_class}">{escape(rating)}</span>'
 
 
-def _render_additional_columns(entry: HorseEntry, columns: Sequence[AdditionalColumn]) -> Iterable[str]:
+def _render_additional_columns(
+    entry: HorseEntry, columns: Sequence[AdditionalColumn]
+) -> Iterable[str]:
     for column in columns:
         text = entry.notes.get(column.key, "")
         yield f"<td>{escape(text)}</td>"
 
 
 def _render_legend(criteria: Iterable[Criterion], legend: dict[str, str]) -> str:
-    items = []
+    items: list[str] = []
     for criterion in criteria:
         text = legend.get(criterion.key) or criterion.description
         if not text:
             continue
-        items.append(f"<li><strong>{escape(criterion.label)}:</strong> {escape(text)}</li>")
+        items.append(
+            f"<li><strong>{escape(criterion.label)}:</strong> {escape(text)}</li>"
+        )
     if not items:
         return ""
     return "<ul class=\"legend\">" + "".join(items) + "</ul>"
 
+
+def _post_position_cell(table: RaceTable, entry: HorseEntry) -> str:
+    background = table.bracket_colors.get(entry.post_position)
+    text_color: str | None = None
+
+    if background:
+        text_color = _auto_text_color(background)
+    else:
+        background = DEFAULT_BRACKET_COLORS.get(entry.post_position)
+        if background:
+            text_color = DEFAULT_BRACKET_TEXT_COLORS.get(entry.post_position, "#000000")
+
+    style_attr = ""
+    if background:
+        text_color = text_color or _auto_text_color(background)
+        style_attr = f' style="background:{background};color:{text_color};"'
+
+    return (
+        f"<td class=\"post-position\"{style_attr}>"
+        f"{escape(str(entry.post_position))}</td>"
+    )
 
 def render_html(table: RaceTable) -> str:
     """Render the race table to an HTML string."""
@@ -183,46 +210,47 @@ def render_html(table: RaceTable) -> str:
     if table.subtitle:
         body_parts.append(f"    <h2>{escape(table.subtitle)}</h2>")
     if table.distance_note:
-        body_parts.append(f"    <div class=\"distance-note\">{escape(table.distance_note)}</div>")
+        body_parts.append(
+            f"    <div class=\"distance-note\">{escape(table.distance_note)}</div>"
+        )
+
 
     body_parts.append("    <table class=\"race-table\">")
 
     headers = table.column_headers()
-    header_html = "      <tr>" + "".join(f"<th>{escape(header)}</th>" for header in headers) + "</tr>"
+
+    header_html = "      <tr>" + "".join(
+        f"<th>{escape(header)}</th>" for header in headers
+    ) + "</tr>"
+
     body_parts.append("      <thead>")
     body_parts.append(header_html)
     body_parts.append("      </thead>")
     body_parts.append("      <tbody>")
 
     for entry in table.horses:
-        row_cells = []
-        background = table.bracket_colors.get(entry.post_position)
-        text_color = None
-        if background:
-            text_color = _auto_text_color(background)
-        else:
-            background = DEFAULT_BRACKET_COLORS.get(entry.post_position)
-            text_color = DEFAULT_BRACKET_TEXT_COLORS.get(entry.post_position, "#000000") if background else "#000000"
-        style_attr = ""
-        if background:
-            style_attr = f' style="background:{background};color:{text_color};"'
-        row_cells.append(
-            f"<td class=\"post-position\"{style_attr}>{escape(str(entry.post_position))}</td>"
-        )
+        row_cells: list[str] = []
+        row_cells.append(_post_position_cell(table, entry))
         row_cells.append(f"<td>{escape(str(entry.number))}</td>")
         row_cells.append(f"<td class=\"name\">{escape(entry.name)}</td>")
         row_cells.append(f"<td>{escape(entry.sex_age)}</td>")
         row_cells.append(f"<td>{escape(entry.weight)}</td>")
         row_cells.append(f"<td>{escape(entry.jockey)}</td>")
+
         if table.additional_columns:
             row_cells.extend(_render_additional_columns(entry, table.additional_columns))
         if table.has_running_style:
             row_cells.append(f"<td>{escape(entry.running_style or '')}</td>")
+
         for criterion in table.criteria:
             rating = entry.ratings.get(criterion.key)
             row_cells.append(f"<td>{_render_rating_cell(rating)}</td>")
+
         if table.has_comments:
-            row_cells.append(f"<td class=\"comments\">{escape(entry.comments or '')}</td>")
+            row_cells.append(
+                f"<td class=\"comments\">{escape(entry.comments or '')}</td>"
+            )
+
 
         body_parts.append("        <tr>" + "".join(row_cells) + "</tr>")
 

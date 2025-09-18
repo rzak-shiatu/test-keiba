@@ -54,7 +54,6 @@ class Criterion:
 class HorseEntry:
     """Represents a single horse entry row in the table."""
 
-    post_position: int
     number: int
     name: str
     sex_age: str
